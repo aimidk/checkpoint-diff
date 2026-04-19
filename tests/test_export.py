@@ -69,6 +69,15 @@ def test_export_csv_has_header():
     assert result.startswith("key,status")
 
 
+def test_export_csv_row_count_matches_diff():
+    """Each diff entry should produce exactly one CSV row."""
+    a, b = _make_checkpoints()
+    diff = compute_diff(a, b)
+    result = export_csv(diff)
+    rows = list(csv.DictReader(io.StringIO(result)))
+    assert len(rows) == len(diff)
+
+
 def test_export_diff_json():
     a, b = _make_checkpoints()
     diff = compute_diff(a, b)
