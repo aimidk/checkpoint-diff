@@ -28,6 +28,12 @@ Export the diff to a file:
 checkpoint-diff compare model_v1.pt model_v2.pt --output diff_report.json
 ```
 
+Filter to only show layers with significant changes:
+
+```bash
+checkpoint-diff compare model_v1.pt model_v2.pt --threshold 0.01
+```
+
 ### Options
 
 | Flag | Description |
