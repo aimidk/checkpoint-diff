@@ -32,6 +32,26 @@ def add_tag_args(parser: argparse.ArgumentParser) -> None:
     )
 
 
+def _parse_tag_item(item: str) -> tuple[str, str]:
+    """Parse a single ``KEY:TAG`` string into a ``(key, tag)`` tuple.
+
+    Raises
+    ------
+    ValueError
+        If *item* does not contain a ``:`` separator, or if either the key
+        or tag is empty after stripping whitespace.
+    """
+    if ":" not in item:
+        raise ValueError(f"--tag value must be KEY:TAG, got: {item!r}")
+    key, tag = item.split(":", 1)
+    key, tag = key.strip(), tag.strip()
+    if not key:
+        raise ValueError(f"--tag key must not be empty, got: {item!r}")
+    if not tag:
+        raise ValueError(f"--tag tag must not be empty, got: {item!r}")
+    return key, tag
+
+
 def apply_tags(
     args: argparse.Namespace,
     diff: CheckpointDiff,
@@ -42,10 +62,8 @@ def apply_tags(
         store = TagStore()
 
     for item in getattr(args, "tag", []):
-        if ":" not in item:
-            raise ValueError(f"--tag value must be KEY:TAG, got: {item!r}")
-        key, tag = item.split(":", 1)
-        store.add(key.strip(), tag.strip())
+        key, tag = _parse_tag_item(item)
+        store.add(key, tag)
 
     filter_tag: Optional[str] = getattr(args, "filter_tag", None)
     if filter_tag:
