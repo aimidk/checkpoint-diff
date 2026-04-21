@@ -56,6 +56,20 @@ def test_add_watch_args_parses_watch_dir(tmp_path: Path) -> None:
     assert args.watch == str(tmp_path)
 
 
+def test_add_watch_args_parses_custom_interval() -> None:
+    """Ensure --watch-interval accepts float values other than the default."""
+    parser = _make_parser()
+    args = parser.parse_args(["--watch-interval", "2.5"])
+    assert args.watch_interval == 2.5
+
+
+def test_add_watch_args_parses_max_polls() -> None:
+    """Ensure --watch-max-polls is stored as an integer."""
+    parser = _make_parser()
+    args = parser.parse_args(["--watch-max-polls", "10"])
+    assert args.watch_max_polls == 10
+
+
 # ---------------------------------------------------------------------------
 # apply_watch
 # ---------------------------------------------------------------------------
