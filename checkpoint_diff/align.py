@@ -34,6 +34,27 @@ def auto_detect_prefix(keys_a: List[str], keys_b: List[str]) -> Tuple[str, str]:
     return prefix_a, prefix_b
 
 
+def find_unmatched_keys(
+    ckpt_a: Dict[str, np.ndarray],
+    ckpt_b: Dict[str, np.ndarray],
+) -> Tuple[List[str], List[str]]:
+    """Return keys present in one checkpoint but not the other.
+
+    Args:
+        ckpt_a: First checkpoint dictionary.
+        ckpt_b: Second checkpoint dictionary.
+
+    Returns:
+        A tuple ``(only_in_a, only_in_b)`` where each element is a sorted list
+        of keys that exist exclusively in the corresponding checkpoint.
+    """
+    keys_a = set(ckpt_a.keys())
+    keys_b = set(ckpt_b.keys())
+    only_in_a = sorted(keys_a - keys_b)
+    only_in_b = sorted(keys_b - keys_a)
+    return only_in_a, only_in_b
+
+
 def align_checkpoints(
     ckpt_a: Dict[str, np.ndarray],
     ckpt_b: Dict[str, np.ndarray],
