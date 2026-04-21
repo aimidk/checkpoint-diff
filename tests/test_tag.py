@@ -93,6 +93,19 @@ def test_filter_diff_by_tag_no_matches_empty():
     assert not result.added and not result.changed
 
 
+def test_filter_diff_by_tag_preserves_removed_and_unchanged():
+    """Tags on removed/unchanged keys should also be respected by filter."""
+    diff = _make_diff()
+    store = TagStore()
+    store.add("old.bias", "frozen")
+    store.add("embed.weight", "frozen")
+    result = filter_diff_by_tag(diff, store, "frozen")
+    assert "old.bias" in result.removed
+    assert "embed.weight" in result.unchanged
+    assert not result.added
+    assert not result.changed
+
+
 def test_format_tags_lists_keys():
     store = TagStore()
     store.add("layer.weight", "frozen")
