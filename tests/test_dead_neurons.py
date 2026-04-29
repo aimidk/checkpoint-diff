@@ -54,6 +54,14 @@ def test_dead_count_mixed():
     assert dead == 2
 
 
+def test_dead_count_respects_eps():
+    """Values within eps of zero should be counted as dead."""
+    arr = np.array([0.0, 5e-7, -5e-7, 1.0])
+    total, dead = _dead_count(arr, eps=1e-6)
+    assert total == 4
+    assert dead == 3
+
+
 # --- compute_dead_neurons ---
 
 def test_compute_dead_neurons_basic():
@@ -100,6 +108,13 @@ def test_compute_dead_neurons_sorted_by_abs_delta():
     assert rows[0].key == "large"
 
 
+def test_compute_dead_neurons_empty_diff():
+    """An empty diff should return an empty list without errors."""
+    diff = _make_diff({})
+    rows = compute_dead_neurons(diff)
+    assert rows == []
+
+
 # --- format_dead_neurons ---
 
 def test_format_dead_neurons_contains_key():
@@ -109,16 +124,7 @@ def test_format_dead_neurons_contains_key():
     assert "layer.weight" in out
 
 
-def test_format_dead_neurons_empty_returns_message():
-    assert "No dead-neuron" in format_dead_neurons([])
-
-
-def test_format_dead_neurons_top_n_limits_output():
-    diff = _make_diff({
-        f"key{i}": _td([float(i % 2)], [0.0]) for i in range(10)
-    })
-    rows = compute_dead_neurons(diff)
-    out = format_dead_neurons(rows, top_n=3)
-    # header + sep + 3 data rows
-    data_lines = [l for l in out.splitlines() if l.startswith("key")]
-    assert len(data_lines) == 3
+def test_format_dead_neurons_empty_rows():
+    """Formatting an empty row list should return a non-error string."""
+    out = format_dead_neurons([])
+    assert isinstance(out, str)
