@@ -52,6 +52,31 @@ def _parse_tag_item(item: str) -> tuple[str, str]:
     return key, tag
 
 
+def build_store_from_args(args: argparse.Namespace) -> TagStore:
+    """Build a :class:`TagStore` from parsed CLI arguments.
+
+    Iterates over every ``--tag KEY:TAG`` value on *args*, parses each one
+    via :func:`_parse_tag_item`, and returns a populated store.  Invalid
+    entries cause :func:`argparse.ArgumentParser.error`-style ``SystemExit``
+    via a re-raised :class:`ValueError` so callers can catch it uniformly.
+
+    Parameters
+    ----------
+    args:
+        Namespace produced by :func:`argparse.ArgumentParser.parse_args`.
+
+    Returns
+    -------
+    TagStore
+        Store populated with every tag supplied on the command line.
+    """
+    store = TagStore()
+    for item in getattr(args, "tag", []):
+        key, tag = _parse_tag_item(item)
+        store.add(key, tag)
+    return store
+
+
 def apply_tags(
     args: argparse.Namespace,
     diff: CheckpointDiff,
@@ -59,11 +84,12 @@ def apply_tags(
 ) -> tuple[CheckpointDiff, TagStore]:
     """Parse tag args, populate *store*, and optionally filter *diff*."""
     if store is None:
-        store = TagStore()
-
-    for item in getattr(args, "tag", []):
-        key, tag = _parse_tag_item(item)
-        store.add(key, tag)
+        store = build_store_from_args(args)
+    else:
+        # Merge any CLI tags into the caller-supplied store.
+        for item in getattr(args, "tag", []):
+            key, tag = _parse_tag_item(item)
+            store.add(key, tag)
 
     filter_tag: Optional[str] = getattr(args, "filter_tag", None)
     if filter_tag:
