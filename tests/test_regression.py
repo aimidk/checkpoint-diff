@@ -110,3 +110,16 @@ def test_format_regression_show_all_includes_non_regressions():
     out = format_regression(report, show_all=True)
     assert "w" in out
     assert "b" in out
+    assert "toward" in out
+    assert "away" in out
+
+
+def test_regression_report_flagged_property():
+    """RegressionReport.flagged should only contain results where regressed=True."""
+    results = [
+        RegressionResult(key="a", direction="away", regressed=True, dist_a=1.0, dist_b=5.0),
+        RegressionResult(key="b", direction="toward", regressed=False, dist_a=4.0, dist_b=1.0),
+    ]
+    report = RegressionReport(results=results)
+    assert len(report.flagged) == 1
+    assert report.flagged[0].key == "a"
